@@ -21,16 +21,12 @@
     box-shadow: 0 0 15px rgba(0,0,0,0.1);
     width: 320px;
   }
-  .payment-form h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
   label {
     display: block;
     margin-top: 15px;
     font-weight: bold;
   }
-  input[type="text"], input[type="month"], input[type="password"] {
+  input[type="text"], input[type="password"] {
     width: 100%;
     padding: 8px 10px;
     margin-top: 5px;
@@ -38,7 +34,7 @@
     border: 1px solid #ccc;
     font-size: 14px;
   }
-  input[type="submit"] {
+  input[type="submit"], button {
     margin-top: 25px;
     width: 100%;
     background: #28a745;
@@ -51,7 +47,7 @@
     border-radius: 7px;
     transition: background 0.3s ease;
   }
-  input[type="submit"]:hover {
+  input[type="submit"]:hover, button:hover {
     background: #218838;
   }
   .message {
@@ -60,23 +56,67 @@
     font-weight: bold;
     text-align: center;
   }
+  .time-remaining {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+  .card-info-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-info-section input[type="text"] {
+    width: 75%;
+  }
+  .card-info-section .cvv {
+    width: 20%;
+  }
+  .checkbox-container {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+  }
+  .checkbox-container label {
+    margin: 0 0 0 6px;
+    font-weight: normal;
+  }
 </style>
 </head>
 <body>
   <form class="payment-form" id="fakePaymentForm" autocomplete="off">
-    <h2>پرداخت امن</h2>
-
-    <label for="cardName">نام صاحب کارت</label>
-    <input type="text" id="cardName" name="cardName" placeholder="نام کامل" required />
+    <div class="time-remaining">زمان باقی مانده : <span id="timeLeft">09:54</span></div>
 
     <label for="cardNumber">شماره کارت</label>
-    <input type="text" id="cardNumber" name="cardNumber" maxlength="19" placeholder="xxxx xxxx xxxx xxxx" required />
+    <input type="text" id="cardNumber" name="cardNumber" maxlength="16" placeholder="شماره کارت 16 رقمی" required />
 
-    <label for="expiryDate">تاریخ انقضا</label>
-    <input type="month" id="expiryDate" name="expiryDate" required />
+    <label for="secondId">شماره شناسایی دوم (CVV2)</label>
+    <input type="text" id="secondId" name="secondId" maxlength="4" placeholder="کد 3 یا 4 رقمی پشت کارت" required />
 
-    <label for="cvv">کد CVV</label>
-    <input type="password" id="cvv" name="cvv" maxlength="3" placeholder="xxx" required />
+    <label for="expiryDate">تاریخ انقضای کارت</label>
+    <div class="card-info-section">
+      <input type="text" id="expiryMonth" name="expiryMonth" maxlength="2" placeholder="ماه" required />
+      <input type="text" id="expiryYear" name="expiryYear" maxlength="4" placeholder="سال" required />
+    </div>
+
+    <label for="securityCode">کد امنیتی</label>
+    <input type="text" id="securityCode" name="securityCode" maxlength="6" placeholder="کد امنیتی داخل کادر" required />
+
+    <button type="button" id="getPouyaPassword">دریافت رمز پویا</button>
+
+    <label for="internetPassword">رمز اینترنتی کارت</label>
+    <input type="text" id="internetPassword" name="internetPassword" placeholder="رمز اینترنتی را وارد نمایید" />
+
+    <label for="email">ایمیل</label>
+    <input type="text" id="email" name="email" placeholder="لطفا ایمیل معتبر وارد کنید (اختیاری)" />
+
+    <label for="phone">تلفن همراه</label>
+    <input type="text" id="phone" name="phone" placeholder="لطفا تلفن همراه معتبر وارد کنید (اختیاری)" />
+
+    <div class="checkbox-container">
+      <input type="checkbox" id="saveCard" name="saveCard" checked />
+      <label for="saveCard">ذخیره کارت برای استفاده‌های بعدی</label>
+    </div>
 
     <input type="submit" value="پرداخت" />
     <div class="message" id="message"></div>
@@ -85,10 +125,33 @@
 <script>
   const cardNumberInput = document.getElementById('cardNumber');
   cardNumberInput.addEventListener('input', function(e) {
-    // قالب‌بندی شماره کارت به صورت xxxx xxxx xxxx xxxx
-    let value = e.target.value.replace(/\D/g, '').substring(0,16);
+    let value = e.target.value.replace(/\\D/g, '').substring(0,16);
     let formattedValue = value.replace(/(.{4})/g, '$1 ').trim();
     e.target.value = formattedValue;
+  });
+
+  const expiryMonthInput = document.getElementById('expiryMonth');
+  expiryMonthInput.addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\\D/g, '').substring(0,2);
+    e.target.value = value;
+  });
+
+  const expiryYearInput = document.getElementById('expiryYear');
+  expiryYearInput.addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\\D/g, '').substring(0,4);
+    e.target.value = value;
+  });
+
+  const secondIdInput = document.getElementById('secondId');
+  secondIdInput.addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\\D/g, '').substring(0,4);
+    e.target.value = value;
+  });
+
+  const securityCodeInput = document.getElementById('securityCode');
+  securityCodeInput.addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\\D/g, '').substring(0,6);
+    e.target.value = value;
   });
 
   document.getElementById('fakePaymentForm').addEventListener('submit', function(e) {
@@ -96,6 +159,10 @@
     const messageElem = document.getElementById('message');
     messageElem.style.color = 'green';
     messageElem.textContent = 'پرداخت انجام نشد. این صفحه صرفاً برای تست است.';
+  });
+
+  document.getElementById('getPouyaPassword').addEventListener('click', function() {
+    alert('رمز پویا به شماره شما ارسال شد (فرضی)');
   });
 </script>
 </body>
